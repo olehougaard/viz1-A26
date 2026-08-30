@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Using the luminence channel</title>
+    </head>
+    <body>
+        <h1>Using the luminence channel</h1>
+
+        <svg width="800" height="600">
+        </svg>  
+        
+        <script src="https://d3js.org/d3.v7.min.js"></script>
+        <script>
+          const svg = d3.select("svg")
+          
+          svg.append("marker")
+            .attr("id", "arrow")
+            .attr("viewBox", "0 0 20 20")
+            .attr("refX", 10)
+            .attr("refY", 5)
+            .attr("markerWidth", 10)
+            .attr("markerHeight", 10)
+            .attr("orient", "auto")
+            .append("path")
+              .attr("d", "M 0 0 l 10 5 l -10 5")
+              .attr("stroke", "black")
+              .attr("stroke-width", 2)
+              .attr("fill", "none")
+
+          const systolicScale = d3.scaleLinear()
+            .domain([90, 160])
+            .range([100, 660])
+
+          const diastolicScale = d3.scaleLinear()
+            .domain([60, 110])
+            .range([500, 100])
+
+          const countScale = d3.scaleLinear()
+            .domain([0, 2000])
+            .range([0, 20])
+
+          const colorScale = d3.scaleLinear()
+            .domain([0, 3])
+            .range(["white", "lightgray", "darkgray", "gray"])
+
+          svg.append("g")
+            .attr("id", "horizontal-axis")
+            .attr("transform", "translate(0, 500)")
+            .call(d3.axisBottom(systolicScale).tickSizeOuter(0).tickValues([100, 110, 120, 130, 140, 150]))
+            .attr("stroke-width", 2)
+            .selectAll("text")
+              .attr("y", 10)
+
+            d3.select("#horizontal-axis path.domain").attr("marker-end", "url(#arrow)")
+
+          svg.append("text")
+            .attr("x", 590)
+            .attr("y", 525)
+            .attr("font-size", 16)
+            .text("Systolic Pressure")
+
+          svg.append("g")
+            .attr("id", "vertical-axis")
+            .attr("transform", "translate(100, 0)")
+            .call(d3.axisLeft(diastolicScale).tickSizeOuter(0).tickValues([70, 80, 90, 100]))
+            .attr("stroke-width", 2)
+            .selectAll("text")
+            .attr("x", -10)
+            
+            d3.select("#vertical-axis path.domain").attr("marker-end", "url(#arrow)")
+
+            svg.append("text").append("tspan")
+              .attr("x", 120)
+              .attr("y", 105)
+              .attr("font-size", 16)
+              .text("Diastolic Pressure")
+
+            const data = [
+              {systolic: 152.5, diastolic: 100, count: 2000, day: 0},
+              {systolic: 145, diastolic: 95, count: 2000, day: 1},
+              {systolic: 130, diastolic: 87.5, count: 1200, day: 2},
+              {systolic: 120, diastolic: 80, count: 800, day: 3}
+            ]
+
+            // This is the wrong approach, but it works for now. The right approach is to use a D3 join.
+            data.forEach(d => {
+              svg.append("circle")
+                .attr("cx", systolicScale(d.systolic))
+                .attr("cy", diastolicScale(d.diastolic))
+                .attr("r", countScale(d.count))
+                .attr("fill", colorScale(d.day))
+                .attr("stroke", "black")
+                .attr("stroke-width", 2)
+            })
+
+            console.log(systolicScale(130))
+    </script>
+    </body>
+</html>

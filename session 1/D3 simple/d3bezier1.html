@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Bezier Curves</title>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Bezier Curves</h1>
+            <svg viewBox="0 0 800 600">
+            </svg>
+        </div>
+        <script src="https://d3js.org/d3.v7.min.js"></script>
+        <script>
+          function drawVector(from, to) {
+            const color = "darkgray"
+            d3.select("svg")
+              .append("circle")
+              .attr("cx", from.x)
+              .attr("cy", from.y)
+              .attr("r", 5)
+              .attr("fill", color)
+            d3.select("svg")
+              .append("line")
+              .attr("x1", from.x)
+              .attr("y1", from.y)
+              .attr("x2", to.x)
+              .attr("y2", to.y)
+              .attr("stroke", color)
+              .attr("stroke-width", 2)
+            d3.select("svg")
+              .append("circle")
+              .attr("cx", to.x)
+              .attr("cy", to.y)
+              .attr("r", 5)
+              .attr("fill", color)
+          }
+
+          const dx = 100
+          const startingPoint = { x: 200, y: 100 }
+          const endingPoint = { x: 500, y: 200 }
+          const controlPoint1 = { x: 350, y: 100 }
+          const controlPoint2 = { x: 350, y: 200 }
+
+          d3.select("svg")
+            .append("path")
+            .attr("d", `M ${startingPoint.x} ${startingPoint.y} C ${controlPoint1.x} ${controlPoint1.y}, ${controlPoint2.x} ${controlPoint2.y}, ${endingPoint.x} ${endingPoint.y}`)
+            .attr("fill", "none")
+            .attr("stroke", "black")
+            .attr("stroke-width", 2)
+            drawVector(startingPoint, controlPoint1)
+            drawVector(controlPoint2, endingPoint)
+        </script>
+    </body>
+</html>

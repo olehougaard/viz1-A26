@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Using the luminence channel</title>
+    </head>
+    <body>
+        <h1>Using the luminence channel</h1>
+
+        <svg width="800" height="600">
+          <marker
+            id="arrow"
+            viewBox="0 0 10 10"
+            refX="10"
+            refY="5"
+            markerWidth="6"
+            markerHeight="6"
+            orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10" stroke="black" stroke-width="2" fill="none"/>
+          </marker>
+
+          <line x1="100" y1="500" x2="700" y2="500" stroke="black" stroke-width="2" marker-end="url(#arrow)"/>
+          <text x="590" y="525" font-size="16">Systolic Pressure</text>
+
+          <line x1="100" y1="500" x2="100" y2="100" stroke="black" stroke-width="2" marker-end="url(#arrow)"/>
+          <text x="120" y="105" font-size="16">Diastolic Pressure</text>
+                    
+          <line x1="90" y1="420" x2="110" y2="420" stroke="black" stroke-width="2"/>
+          <text x="120" y="425" font-size="16">70</text>
+          <line x1="90" y1="340" x2="110" y2="340" stroke="black" stroke-width="2"/>
+          <text x="120" y="345" font-size="16">80</text>
+          <line x1="90" y1="260" x2="110" y2="260" stroke="black" stroke-width="2"/>
+          <text x="120" y="265" font-size="16">90</text>
+          <line x1="90" y1="180" x2="110" y2="180" stroke="black" stroke-width="2"/>
+          <text x="120" y="185" font-size="16">100</text>
+
+          <line x1="180" y1="490" x2="180" y2="510" stroke="black" stroke-width="2"/>
+          <text x="173" y="480" font-size="16">100</text>
+          <line x1="260" y1="490" x2="260" y2="510" stroke="black" stroke-width="2"/>
+          <text x="253" y="480" font-size="16">110</text>
+          <line x1="340" y1="490" x2="340" y2="510" stroke="black" stroke-width="2"/>
+          <text x="333" y="480" font-size="16">120</text>
+          <line x1="420" y1="490" x2="420" y2="510" stroke="black" stroke-width="2"/>
+          <text x="413" y="480" font-size="16">130</text>
+          <line x1="500" y1="490" x2="500" y2="510" stroke="black" stroke-width="2"/>
+          <text x="493" y="480" font-size="16">140</text>
+          <line x1="580" y1="490" x2="580" y2="510" stroke="black" stroke-width="2"/>
+          <text x="573" y="480" font-size="16">150</text>
+
+          <circle cx="600" cy="180" r="20" fill="white" stroke="black" stroke-width="2"/>
+          <circle cx="540" cy="220" r="20" fill="lightgray" stroke="black" stroke-width="2"/>
+          <circle cx="420" cy="280" r="12" fill="darkgray" stroke="black" stroke-width="2"/>
+          <circle cx="340" cy="340" r="8" fill="gray" stroke="black" stroke-width="2"/>
+        </svg>  
+    </body>
+</html>
