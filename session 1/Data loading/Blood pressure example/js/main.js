@@ -17,7 +17,7 @@ async function visualize() {
     
     const systolicScale = d3.scaleLinear()  
     .domain([90, 160])
-  .range([100, 660])
+    .range([100, 660])
 
   const diastolicScale = d3.scaleLinear()
   .range([500, 100])
@@ -65,7 +65,7 @@ async function visualize() {
 
   const data = await d3.json("./data/bp.json")
 
-  svg.selectAll("circle")
+  const circles = svg.selectAll("circle")
     .data(data)
     .join("circle")
     .attr("cx", d => systolicScale(d.systolic))
@@ -74,4 +74,6 @@ async function visualize() {
     .attr("fill", d => dayScale(d.day))
     .attr("stroke", "black")
     .attr("stroke-width", 2)
+
+  console.log(circles)
 }
