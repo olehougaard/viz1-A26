@@ -1,0 +1,14 @@
+#container {
+  width: 800px;
+  height: 600px;
+}
+
+#barChartSVG {
+  overflow: scroll;
+  height: 520px;
+}
+
+.country-label {
+    font-size: 16px;
+    text-anchor: right;
+}

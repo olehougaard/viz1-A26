@@ -1,0 +1,6 @@
+[
+  {"systolic": 152.5, "diastolic": 100, "count": 2000, "day": 0},
+  {"systolic": 145, "diastolic": 95, "count": 2000, "day": 1},
+  {"systolic": 130, "diastolic": 87.5, "count": 1200, "day": 2},
+  {"systolic": 120, "diastolic": 80, "count": 800, "day": 3}
+]
