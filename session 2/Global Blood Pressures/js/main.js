@@ -1,7 +1,13 @@
 let data
 
 async function loadData() {
-  data = await d3.csv("./data/blood_pressure_global_dataset.csv", d3.autoType)
+  const rawData = await d3.csv("./data/blood_pressure_global_dataset.csv", d3.autoType)
+  data = rawData.map(d => {
+    return {
+      ...d,
+      Date: new Date(d.Date),
+    }
+  })
   console.log(data)
   console.log(data[0])
   console.log(descriptiveStatistics(data, d => d.Diastolic_BP_mmHg))
@@ -20,47 +26,57 @@ function descriptiveStatistics(data, extractor) {
 }
 
 function visualizeDiastolicSystolic() {
-  const diastolicScale = d3.scaleLinear()
-    .domain([25, 130])
-    .range([500, 100])
-
-  const systolicScale = d3.scaleLinear()
-    .domain([40, 250])
-    .range([100, 700])
-
   d3.select("#container").selectAll("*").remove()
   const svg = d3.select("#container").append("svg")
     .attr("viewBox", "0 0 800 600")
 
-  svg.append("g")
+  const width = 800
+  const height = 600
+  const margins = {top: 50, right: 50, bottom: 50, left: 50}
+  const visibleWidth = width - margins.left - margins.right
+  const visibleHeight = height - margins.top - margins.bottom
+
+  const visibleArea = svg.append("g")
+    .attr("transform", 
+          `translate(${margins.left}, ${margins.top}) 
+           scale(${visibleWidth / width}, ${visibleHeight / height})`)
+
+  const diastolicScale = d3.scaleLinear()
+    .domain([25, 130])
+    .range([height, 0])
+
+  const systolicScale = d3.scaleLinear()
+    .domain([40, 250])
+    .range([0, width])
+
+  visibleArea.append("g")
     .attr("id", "horizontal-axis")
-    .attr("transform", "translate(0, 500)")
+    .attr("transform", `translate(0, ${height})`)
     .call(d3.axisBottom(systolicScale))
     .attr("stroke-width", 2)
     .selectAll("text")
       .attr("y", 10)
 
-  svg.append("text")
-  .attr("x", 590)
-  .attr("y", 535)
-  .attr("font-size", 16)
+  visibleArea.append("text")
+  .attr("x", 670)
+  .attr("y", 645)
+  .attr("font-size", 20)
   .text("Systolic Pressure")
 
-  svg.append("g")
+  visibleArea.append("g")
   .attr("id", "vertical-axis")
-  .attr("transform", "translate(100, 0)")
   .call(d3.axisLeft(diastolicScale))
   .attr("stroke-width", 2)
   .selectAll("text")
   .attr("x", -10)
 
-  svg.append("text").append("tspan")
-    .attr("x", 40)
-    .attr("y", 85)
-    .attr("font-size", 16)
+  visibleArea.append("text")
+    .attr("x", 30)
+    .attr("y", 20)
+    .attr("font-size", 20)
     .text("Diastolic Pressure")
 
-  svg.selectAll("circle")
+  visibleArea.selectAll("circle")
     .data(data)
     .join("circle")
     .attr("cx", d => systolicScale(d.Systolic_BP_mmHg))
@@ -285,10 +301,9 @@ function visualizeBloodPressureByCountryAndGender() {
     .range(d3.schemeCategory10)
 
   d3.select("#container").selectAll("*").remove()
+
   const axisSVG = d3.select("#container").append("svg")
-    .attr("viewBox", "0 0 800 60")
-
-
+    .attr("viewBox", "0 0 800 70")
 
   const svg = d3.select("#container")
     .append("div")
