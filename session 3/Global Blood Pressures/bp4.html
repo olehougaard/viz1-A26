@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Blood Pressure Visualizations</title>
+        
+        <link rel="stylesheet" href="./css/styles.css">
+
+        <script src="https://d3js.org/d3.v7.min.js"></script>
+        <script src="./js/main.js"></script>
+    </head>
+    <body onload="init()">
+        <h1>Blood Pressure Visualizations</h1>
+
+        <div id = "container">
+          <svg viewBox="0 0 800 4000"/>
+        </div>
+
+        <div>
+          <input id = "vis1" type="radio" name="visualization" value="bloodPressureByAgeGroup" onclick="visualizeAgeGroupByRegion()" checked> Blood Pressure by Age Group
+          <input id = "vis2" type="radio" name="visualization" value="diastolicSystolic" onclick="visualizeDiastolicSystolic()">Diastolic and Systolic Blood Pressure 
+          <input id = "vis3" type="radio" name="visualization" value="bloodPressureByCountry" onclick="visualizeBloodPressureByCountry()"> Blood Pressure by Country
+          <input id = "vis4" type="radio" name="visualization" value="bloodPressureByCountryAndGender" onclick="visualizeBloodPressureByCountryAndGender()"> Blood Pressure by Country and Gender
+        </div>
+    </body>
+</html>
