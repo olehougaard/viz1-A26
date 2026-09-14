@@ -478,6 +478,6 @@ function visualizeAgeGroupByYearStreamGraphCentered() {
 
 async function init() {
   await loadData()
-  visualizeAgeGroupByYearStreamGraphCentered()
-  document.getElementById("vis4").checked = true
+  visualizeAgeGroupByRegion()
+  document.getElementById("vis1").checked = true
 }
