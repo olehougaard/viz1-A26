@@ -200,23 +200,8 @@ function visualizeBloodPressureByAgeGroup() {
     "Very Elderly (80+)"
 ]
 
-  const groupedData = d3.group(data, d => d.Age_Group)
-  const bloodPressureByAgeGroup = {}
-  for(const ageGroup of ageGroups) {
-    const values = groupedData.get(ageGroup)
-    if(values) {
-      bloodPressureByAgeGroup[ageGroup] = {
-        averageMAP: d3.mean(values, d => d.Mean_Arterial_Pressure),
-        averageDiastolic: d3.mean(values, d => d.Diastolic_BP_mmHg),
-        averageSystolic: d3.mean(values, d => d.Systolic_BP_mmHg),
-        sampleSize: values.length
-      }
-    }
-  }
-
-  console.log(d3.min(ageGroups.map(ageGroup => bloodPressureByAgeGroup[ageGroup].averageMAP)))
-  console.log(d3.max(ageGroups.map(ageGroup => bloodPressureByAgeGroup[ageGroup].averageMAP)))
-
+  const groupedData = d3.rollup(data, group => d3.mean(group, d => d.Mean_Arterial_Pressure), d => d.Age_Group)
+  
   const mapScale = d3.scaleLinear()
     .domain([50, 110])
     .range([150, 700])
@@ -228,7 +213,7 @@ function visualizeBloodPressureByAgeGroup() {
 
   const ageGroupColorScale = d3.scaleOrdinal()
     .domain(ageGroups)
-    .range(d3.schemeAccent)
+    .range(d3.schemePaired)
 
   d3.select("#container").selectAll("*").remove()
   const svg = d3.select("#container").append("svg")
@@ -269,7 +254,7 @@ function visualizeBloodPressureByAgeGroup() {
     .join("rect")
     .attr("x", leftMargin)
     .attr("y", d => ageGroupScale(d))
-    .attr("width", d => mapScale(bloodPressureByAgeGroup[d].averageMAP) - leftMargin)
+    .attr("width", d => mapScale(groupedData.get(d)) - leftMargin)
     .attr("height", ageGroupScale.bandwidth())
     .attr("fill", d => ageGroupColorScale(d))
 }
