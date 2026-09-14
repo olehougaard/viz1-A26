@@ -40,6 +40,35 @@ const ageGroups = [
   "Very Elderly (80+)"
 ]
 
+function displayLegend(visibleArea, ageGroupColorScale, y = 0) {
+  const bottom = 30 * ageGroups.length
+
+  const legend = visibleArea.append("g")
+    .attr("id", "legend")
+    .attr("transform", `translate(840, ${y})`)
+  
+  legend
+    .selectAll("rect")
+    .data(ageGroups)
+    .join("rect")
+    .attr("x", 0)
+    .attr("y", (_, i) => bottom - (i + 1) * 30)
+    .attr("width", 20)
+    .attr("height", 20)
+    .attr("fill", d => ageGroupColorScale(d))
+    .attr("stroke", "black")
+    .attr("stroke-width", 2)
+
+  legend
+    .selectAll("text")
+    .data(ageGroups)
+    .join("text")
+    .attr("x", 30)
+    .attr("y", (_, i) => bottom - (i + 1) * 30 + 15)
+    .attr("font-size", 16)
+    .text(d => d)
+}
+
 function visualizeAgeGroupByRegion() {
   const groupedData = d3.rollup(data, d => d.length, d => d.WHO_Region, d => d.Age_Group)
 
@@ -74,6 +103,7 @@ function visualizeAgeGroupByRegion() {
   const ageGroupColorScale = d3.scaleOrdinal()
     .domain(ageGroups)
     .range(ageGroups.map((_, i) => d3.interpolateViridis((ageGroups.length - i - 1) / ageGroups.length)))
+//    .range(ageGroups.map((_, i) => d3.interpolateTurbo((ageGroups.length - i - 1) / ageGroups.length)))
 
   const width = 1000
   const height = 600
@@ -127,34 +157,11 @@ function visualizeAgeGroupByRegion() {
     .attr("y", d => sizeScale(d[1]))
     .attr("height", d => sizeScale(d[0]) - sizeScale(d[1]))
 
-  
-  const legend = visibleArea.append("g")
-    .attr("id", "legend")
-    .attr("transform", "translate(840, 0)")
-  
-  legend
-    .selectAll("rect")
-    .data(ageGroups)
-    .join("rect")
-    .attr("x", 0)
-    .attr("y", (_, i) => i * 30)
-    .attr("width", 20)
-    .attr("height", 20)
-    .attr("fill", d => ageGroupColorScale(d))
-    .attr("stroke", "black")
-    .attr("stroke-width", 2)
-
-  legend
-    .selectAll("text")
-    .data(ageGroups)
-    .join("text")
-    .attr("x", 30)
-    .attr("y", (_, i) => i * 30 + 15)
-    .attr("font-size", 16)
-    .text(d => d)
+  displayLegend(visibleArea, ageGroupColorScale)
 }
 
 function visualizeAgeGroupByYear() {
+
   const groupedData = d3.rollup(data, d => d.length, d => d.Year, d => d.Age_Group)
 
   console.log(groupedData)
@@ -238,30 +245,7 @@ function visualizeAgeGroupByYear() {
     .attr("y", d => sizeScale(d[1]))
     .attr("height", d => sizeScale(d[0]) - sizeScale(d[1]))
   
-  const legend = visibleArea.append("g")
-    .attr("id", "legend")
-    .attr("transform", "translate(840, 0)")
-  
-  legend
-    .selectAll("rect")
-    .data(ageGroups)
-    .join("rect")
-    .attr("x", 0)
-    .attr("y", (_, i) => i * 30)
-    .attr("width", 20)
-    .attr("height", 20)
-    .attr("fill", d => ageGroupColorScale(d))
-    .attr("stroke", "black")
-    .attr("stroke-width", 2)
-
-  legend
-    .selectAll("text")
-    .data(ageGroups)
-    .join("text")
-    .attr("x", 30)
-    .attr("y", (_, i) => i * 30 + 15)
-    .attr("font-size", 16)
-    .text(d => d)
+  displayLegend(visibleArea, ageGroupColorScale)
 }
 
 function visualizeAgeGroupByYearStreamGraph() {
@@ -350,30 +334,7 @@ function visualizeAgeGroupByYearStreamGraph() {
     .attr("d", areaGenerator)
     .attr("fill", d => ageGroupColorScale(d.key))   
     
-  const legend = visibleArea.append("g")
-    .attr("id", "legend")
-    .attr("transform", "translate(840, 0)")
-  
-  legend
-    .selectAll("rect")
-    .data(ageGroups)
-    .join("rect")
-    .attr("x", 0)
-    .attr("y", (_, i) => i * 30)
-    .attr("width", 20)
-    .attr("height", 20)
-    .attr("fill", d => ageGroupColorScale(d))
-    .attr("stroke", "black")
-    .attr("stroke-width", 2)
-
-  legend
-    .selectAll("text")
-    .data(ageGroups)
-    .join("text")
-    .attr("x", 30)
-    .attr("y", (_, i) => i * 30 + 15)
-    .attr("font-size", 16)
-    .text(d => d)
+  displayLegend(visibleArea, ageGroupColorScale)
 }
 
 function visualizeAgeGroupByYearStreamGraphCentered() {
@@ -450,30 +411,7 @@ function visualizeAgeGroupByYearStreamGraphCentered() {
     .attr("d", areaGenerator)
     .attr("fill", d => ageGroupColorScale(d.key))   
     
-  const legend = visibleArea.append("g")
-    .attr("id", "legend")
-    .attr("transform", "translate(840, 110)")
-  
-  legend
-    .selectAll("rect")
-    .data(ageGroups)
-    .join("rect")
-    .attr("x", 0)
-    .attr("y", (_, i) => i * 30)
-    .attr("width", 20)
-    .attr("height", 20)
-    .attr("fill", d => ageGroupColorScale(d))
-    .attr("stroke", "black")
-    .attr("stroke-width", 2)
-
-  legend
-    .selectAll("text")
-    .data(ageGroups)
-    .join("text")
-    .attr("x", 30)
-    .attr("y", (_, i) => i * 30 + 15)
-    .attr("font-size", 16)
-    .text(d => d)
+  displayLegend(visibleArea, ageGroupColorScale, 110)
 }
 
 async function init() {
