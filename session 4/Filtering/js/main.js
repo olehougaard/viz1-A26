@@ -88,8 +88,64 @@ function drawLegend({model, viz, dom, update}) {
     .text(d => d)
 }
 
+function initialView(state) {
+  const {model, viz, dom} = state
+
+  const selected = model.selected
+  
+  const { diastolicScale, systolicScale, whoRegionScale } = viz
+
+  drawAxes(state)
+  drawLegend(state)
+
+  const filteredData = model.groupedData.filter(d => selected.has(d.WHO_Region))
+  
+  const sizeScale = viz.sizeScale
+  
+  const diagram = dom.diagram
+
+  const circles = diagram.selectAll("circle")
+    .data(filteredData, d => d.key)
+    .join("circle")
+    .attr("r", d => sizeScale(d.sampleSize))
+    .attr("cx", d => systolicScale(d.averageSystolic))
+    .attr("cy", d => diastolicScale(d.averageDiastolic))
+    .attr("fill", d => whoRegionScale(d.WHO_Region))
+    .attr("stroke", "black")
+    .attr("stroke-width", 2)
+
+  
+  const toolTipFadeDuration = 500
+
+  const showTooltip = ({clientX, clientY}, {key}) => {
+    const x = (clientX - 10) / dom.scaleX
+    const y = (clientY - 80) / dom.scaleY
+    dom.toolTipText
+      .text(key)
+    dom.toolTip
+      .attr('transform', `translate(${x}, ${y})`)
+      .transition()
+      .duration(toolTipFadeDuration)
+      .ease(d3.easeQuadInOut)
+      .style('opacity', 1)
+  }
+
+  const hideTooltip = () => dom.toolTip
+    .transition()
+    .duration(toolTipFadeDuration)
+    .ease(d3.easeQuadOut)
+    .style('opacity', 0)
+    
+
+  circles.on('mouseenter', showTooltip)
+  
+  circles.on('mousemove', showTooltip)
+  
+  circles.on('mouseleave', hideTooltip)
+}
+
 function view(state) {
-  const {model, viz, dom, update} = state
+  const {model, viz, dom} = state
 
   const selected = model.selected
   
@@ -264,5 +320,5 @@ async function init() {
     }
   }
   
-  view(state)
+  initialView(state)
 }
