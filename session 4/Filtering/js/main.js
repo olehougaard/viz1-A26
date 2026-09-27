@@ -108,7 +108,7 @@ function view(state) {
   const diagram = dom.diagram
 
   const circles = diagram.selectAll("circle")
-    .data(filteredData)
+    .data(filteredData, d => d.key)
     .join(
       enter => enter
         .append("circle")

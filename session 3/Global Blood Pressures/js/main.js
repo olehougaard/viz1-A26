@@ -102,8 +102,8 @@ function visualizeAgeGroupByRegion() {
 
   const ageGroupColorScale = d3.scaleOrdinal()
     .domain(ageGroups)
-    .range(ageGroups.map((_, i) => d3.interpolateViridis((ageGroups.length - i - 1) / ageGroups.length)))
-//    .range(ageGroups.map((_, i) => d3.interpolateTurbo((ageGroups.length - i - 1) / ageGroups.length)))
+//    .range(ageGroups.map((_, i) => d3.interpolateViridis((ageGroups.length - i - 1) / ageGroups.length)))
+    .range(ageGroups.map((_, i) => d3.interpolateTurbo((ageGroups.length - i - 1) / ageGroups.length)))
 
   const width = 1000
   const height = 600
@@ -190,7 +190,8 @@ function visualizeAgeGroupByYear() {
 
   const ageGroupColorScale = d3.scaleOrdinal()
     .domain(ageGroups)
-    .range(ageGroups.map((_, i) => d3.interpolateViridis((ageGroups.length - i - 1) / ageGroups.length)))
+//    .range(ageGroups.map((_, i) => d3.interpolateViridis((ageGroups.length - i - 1) / ageGroups.length)))
+    .range(ageGroups.map((_, i) => d3.interpolateTurbo((ageGroups.length - i - 1) / ageGroups.length)))
 
   const width = 1000
   const height = 600
