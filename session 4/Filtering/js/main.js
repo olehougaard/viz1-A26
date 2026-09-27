@@ -100,10 +100,7 @@ function view(state) {
 
   const filteredData = model.groupedData.filter(d => selected.has(d.WHO_Region))
   
-  const sizeScale = d3.scaleLinear()
-  .domain(d3.extent(model.groupedData, d => d.sampleSize))
-  .range([5, 25])
-  .nice()
+  const sizeScale = viz.sizeScale
   
   const diagram = dom.diagram
 
