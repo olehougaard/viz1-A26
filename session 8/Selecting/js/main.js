@@ -62,6 +62,22 @@ function drawLegend({model, viz, dom, update}) {
   const {whoRegionScale} = viz
   const {legend} = dom
 
+  function legendStroke(region) {
+    if (selected && region !== selected)
+      return 'white'
+    else
+      return 'black'
+  }
+
+  legend
+    .attr('role', 'option')
+    .attr('aria-labelledby', 'legendTitle')
+
+  legend
+    .append('title')
+    .attr('id', 'legendTitle')
+    .text('Legend')
+
   legend
     .selectAll("rect")
     .data(d => d)
@@ -71,12 +87,24 @@ function drawLegend({model, viz, dom, update}) {
     .attr("width", 20)
     .attr("height", 20)
     .attr("fill", d => whoRegionScale(d))
-    .attr("stroke", d => selected.has(d)? 'black': 'white')
-    .attr("stroke-width", d => selected.has(d)? 2 : 1)
+    .attr("stroke", legendStroke)
+    .attr("stroke-width", d => d === selected? 2 : 1)
+    .attr('role', 'radio')
+    .attr('aria-labelledby', d => `${d}Description`)
+    .attr('id', (_, i) => `region${i}`)
+    .attr('aria-flowto', (_, i) => `region${(i + 1) % model.whoRegions.length}`)
+    
     .on('click', (e, d) => {
-      update({selected: selected.symmetricDifference(new Set([d]))})
+      if (selected)
+        update({selected: null})
+      else
+        update({selected: d})
       e.stopPropagation()
     })
+
+    .append('title')
+    .attr('id', d => `${d}Description`)
+    .text(d => d)
 
   legend
     .selectAll("text")
@@ -88,125 +116,107 @@ function drawLegend({model, viz, dom, update}) {
     .text(d => d)
 }
 
-function initialView(state) {
-  const {model, viz, dom} = state
-
-  const selected = model.selected
-  
-  const { diastolicScale, systolicScale, whoRegionScale } = viz
-
-  drawAxes(state)
-  drawLegend(state)
-
-  const filteredData = model.groupedData.filter(d => selected.has(d.WHO_Region))
-  
-  const sizeScale = viz.sizeScale
-  
-  const diagram = dom.diagram
-
-  const circles = diagram.selectAll("circle")
-    .data(filteredData, d => d.key)
-    .join("circle")
-    .attr("r", d => sizeScale(d.sampleSize))
-    .attr("cx", d => systolicScale(d.averageSystolic))
-    .attr("cy", d => diastolicScale(d.averageDiastolic))
-    .attr("fill", d => whoRegionScale(d.WHO_Region))
-    .attr("stroke", "black")
-    .attr("stroke-width", 2)
-
-  
-  const toolTipFadeDuration = 500
-
-  const showTooltip = ({clientX, clientY}, {key}) => {
-    const x = (clientX - 10) / dom.scaleX
-    const y = (clientY - 80) / dom.scaleY
-    dom.toolTipText
-      .text(key)
-    dom.toolTip
-      .attr('transform', `translate(${x}, ${y})`)
-      .transition()
-      .duration(toolTipFadeDuration)
-      .ease(d3.easeQuadInOut)
-      .style('opacity', 1)
+function zoomedData({rawData, selected}) {
+  if (selected) {
+    const visualData = rawData.filter(d => d.WHO_Region === selected)
+    const groupedData = d3.group(visualData, d => d.Country)
+    return Array.from(groupedData, ([key, values]) => ({
+      key: key,
+      Country: key, 
+      WHO_Region: selected,
+      averageDiastolic: d3.mean(values, d => d.Diastolic_BP_mmHg),
+      averageSystolic: d3.mean(values, d => d.Systolic_BP_mmHg),
+      sampleSize: values.length
+    }))    
+  } else {
+    const groupedData = d3.group(rawData, d => d.WHO_Region)
+    return Array.from(groupedData, ([key, values]) => ({ 
+      key: key,
+      WHO_Region: key,
+      averageDiastolic: d3.mean(values, d => d.Diastolic_BP_mmHg),
+      averageSystolic: d3.mean(values, d => d.Systolic_BP_mmHg),
+      sampleSize: values.length
+    }))
   }
-
-  const hideTooltip = () => dom.toolTip
-    .transition()
-    .duration(toolTipFadeDuration)
-    .ease(d3.easeQuadOut)
-    .style('opacity', 0)
-    
-
-  circles.on('mouseenter', showTooltip)
-  
-  circles.on('mousemove', showTooltip)
-  
-  circles.on('mouseleave', hideTooltip)
 }
 
 function view(state) {
-  const {model, viz, dom} = state
+  const {model, viz, dom, update} = state
 
   const selected = model.selected
   
   const { diastolicScale, systolicScale, whoRegionScale } = viz
 
+  const bloodPressureData = zoomedData(model)
+
   drawAxes(state)
   drawLegend(state)
 
-  const filteredData = model.groupedData.filter(d => selected.has(d.WHO_Region))
-  
-  const sizeScale = viz.sizeScale
-  
   const diagram = dom.diagram
 
+  const sizeScale = d3.scaleLinear()
+    .domain(d3.extent(bloodPressureData, d => d.sampleSize))
+    .range([5, 25])
+    .nice()
+
+  d3.select("svg").on("click", () => {
+    update({selected: null})
+  })
+
   const circles = diagram.selectAll("circle")
-    .data(filteredData, d => d.key)
-    .join(
-      enter => enter
-        .append("circle")
-        .style('opacity', 0)
-        .attr("r", 0)
-        .transition()
-        .duration(2000)
-        .attr("r", d => sizeScale(d.sampleSize))
-        .style('opacity', 1),
-      update => update,
-      exit => exit
-        .transition()
-        .duration(2000)
-        .style('opacity', 0)
-        .attr("r", 0)
-        .remove()
-    )
+    .data(bloodPressureData)
+    .join("circle")
     .attr("cx", d => systolicScale(d.averageSystolic))
     .attr("cy", d => diastolicScale(d.averageDiastolic))
+    .attr("r", d => sizeScale(d.sampleSize))
     .attr("fill", d => whoRegionScale(d.WHO_Region))
     .attr("stroke", "black")
     .attr("stroke-width", 2)
 
+  if (model.allTooltips) {
+    const tooltips = diagram.selectAll('.tooltip')
+      .data(bloodPressureData)
+      .join('g')
+      .classed('tooltip', true)
+      .attr('transform', d => `translate(${systolicScale(d.averageSystolic) - 80}, ${diastolicScale(d.averageDiastolic) - 10})`)
+    
+    tooltips.append('rect')
+      .attr('width', '160')
+      .attr('height', '20')
+      .attr('fill', 'cornsilk')
+      .attr('stroke', 'black')
+      .attr('stroke-width', 1)
+    
+    tooltips.append('text')
+      .attr('x', 5)
+      .attr('y', 15)
+      .attr('font-size', 16)
+      .text(d => d.key)
+  } else {
+    const tooltips = diagram.selectAll('.tooltip').remove()
+  }
   
-  const toolTipFadeDuration = 500
-
+  circles.on("click", (e, d) => {
+    if (selected) {
+      update({ selected: null })
+    } else {
+      update({ selected: d.WHO_Region })
+    }
+    e.stopPropagation()
+  })
+  
   const showTooltip = ({clientX, clientY}, {key}) => {
+    if (model.allTooltips) return
     const x = (clientX - 10) / dom.scaleX
     const y = (clientY - 80) / dom.scaleY
     dom.toolTipText
       .text(key)
     dom.toolTip
+      .style('visibility', 'visible')
       .attr('transform', `translate(${x}, ${y})`)
-      .transition()
-      .duration(toolTipFadeDuration)
-      .ease(d3.easeQuadInOut)
-      .style('opacity', 1)
   }
 
-  const hideTooltip = () => dom.toolTip
-    .transition()
-    .duration(toolTipFadeDuration)
-    .ease(d3.easeQuadOut)
-    .style('opacity', 0)
-    
+  const hideTooltip = () => dom.toolTip.style('visibility', 'hidden')
 
   circles.on('mouseenter', showTooltip)
   
@@ -215,35 +225,37 @@ function view(state) {
   circles.on('mouseleave', hideTooltip)
 }
 
-function createModel(data) {
-  const groupedMap = d3.group(data, d => d.Country)
-  const groupedData = Array.from(groupedMap, ([key, values]) => ({
-    key: key,
-    Country: key, 
-    WHO_Region: d3.mode(values, d => d.WHO_Region),
-    averageDiastolic: d3.mean(values, d => d.Diastolic_BP_mmHg),
-    averageSystolic: d3.mean(values, d => d.Systolic_BP_mmHg),
-    sampleSize: values.length
-  }))  
-  const whoRegions = new Set(data.map(d => d.WHO_Region))
+function createModel(rawData) {
   return {
-    groupedData,
-    selected: whoRegions,
-    whoRegions: Array.from(whoRegions).sort()
+    rawData,
+    selected: null,
+    allTooltips: false,
+    whoRegions: Array.from(new Set(rawData.map(d => d.WHO_Region))).sort()
   }
 }
 
 function createDOM({whoRegions}) {
   d3.select("#container").select("*").remove()
 
+  const container = d3.select('#container')
+
   const x = 10
   const y = 10
   const scaleX = .75
   const scaleY = .75
 
-  const svg = d3.select("#container")
+  const tooltipsCheckBox = container.append('input')
+    .attr('type', 'checkbox')
+    .attr('id', 'tooltipsCheckBox')
+
+  const checkBoxLabel = container.append('label')
+    .attr('for', 'tootipsCheckBox')
+    .text('Always show tooltips')
+
+  const svg = container
     .append("svg")
     .attr("viewBox", "0 0 800 600")
+
 
   const drawArea = svg.append('g')
     .attr("transform", 
@@ -261,7 +273,7 @@ function createDOM({whoRegions}) {
 
   const toolTip = drawArea.append('g')
     .attr('id', 'tool-tip')
-    .style('opacity', 0)
+    .style('visibility', 'hidden')
   
   toolTip.append('rect')
     .attr('width', '160')
@@ -274,17 +286,28 @@ function createDOM({whoRegions}) {
     .attr('x', 5)
     .attr('y', 15)
   
-  return {x, y, scaleX, scaleY, svg, diagram, legend, toolTip, toolTipText }
+  return {x, y, scaleX, scaleY, svg, diagram, legend, toolTip, toolTipText, tooltipsCheckBox, checkBoxLabel }
 }
 
-function createViz({groupedData, whoRegions}) {
+function createViz({rawData}) {
+  const whoRegions = Array.from(new Set(rawData.map(d => d.WHO_Region))).sort()
+
+  const averagesByCountry = d3.rollup(
+    rawData,
+    data => ({ 
+      averageDiastolic: d3.mean(data, datum => datum.Diastolic_BP_mmHg),
+      averageSystolic: d3.mean(data, datum => datum.Systolic_BP_mmHg)}), 
+    datum => datum.Country)
+    .values()
+    .toArray()
+
   const diastolicScale = d3.scaleLinear()
-    .domain(d3.extent(groupedData, d => d.averageDiastolic))
+    .domain(d3.extent(averagesByCountry, d => d.averageDiastolic))
     .range([500, 100])
     .nice()
 
   const systolicScale = d3.scaleLinear()
-    .domain(d3.extent(groupedData, d => d.averageSystolic))
+    .domain(d3.extent(averagesByCountry, d => d.averageSystolic))
     .range([100, 700])
     .nice()
 
@@ -292,15 +315,9 @@ function createViz({groupedData, whoRegions}) {
     .domain(whoRegions)
     .range(d3.schemeAccent)
 
-  const sizeScale = d3.scaleLinear()
-  .domain(d3.extent(groupedData, d => d.sampleSize))
-  .range([5, 25])
-  .nice()
-  
   return {
     diastolicScale, 
     systolicScale,
-    sizeScale,
     whoRegionScale,
   }
 }
@@ -319,6 +336,10 @@ async function init() {
       view(state)
     }
   }
+
+  dom.tooltipsCheckBox.on('click', () => {
+    state.update({allTooltips: dom.tooltipsCheckBox.property('checked')})
+  })
   
-  initialView(state)
+  view(state)
 }

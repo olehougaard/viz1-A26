@@ -70,6 +70,15 @@ function drawLegend({model, viz, dom, update}) {
   }
 
   legend
+    .attr('role', 'option')
+    .attr('aria-labelledby', 'legendTitle')
+
+  legend
+    .append('title')
+    .attr('id', 'legendTitle')
+    .text('Legend')
+
+  legend
     .selectAll("rect")
     .data(d => d)
     .join("rect")
@@ -80,6 +89,11 @@ function drawLegend({model, viz, dom, update}) {
     .attr("fill", d => whoRegionScale(d))
     .attr("stroke", legendStroke)
     .attr("stroke-width", d => d === selected? 2 : 1)
+    .attr('role', 'radio')
+    .attr('aria-labelledby', d => `${d}Description`)
+    .attr('id', (_, i) => `region${i}`)
+    .attr('aria-flowto', (_, i) => `region${(i + 1) % model.whoRegions.length}`)
+    
     .on('click', (e, d) => {
       if (selected)
         update({selected: null})
@@ -87,6 +101,10 @@ function drawLegend({model, viz, dom, update}) {
         update({selected: d})
       e.stopPropagation()
     })
+
+    .append('title')
+    .attr('id', d => `${d}Description`)
+    .text(d => d)
 
   legend
     .selectAll("text")
@@ -154,6 +172,29 @@ function view(state) {
     .attr("fill", d => whoRegionScale(d.WHO_Region))
     .attr("stroke", "black")
     .attr("stroke-width", 2)
+
+  if (model.allTooltips) {
+    const tooltips = diagram.selectAll('.tooltip')
+      .data(bloodPressureData)
+      .join('g')
+      .classed('tooltip', true)
+      .attr('transform', d => `translate(${systolicScale(d.averageSystolic) - 80}, ${diastolicScale(d.averageDiastolic) - 10})`)
+    
+    tooltips.append('rect')
+      .attr('width', '160')
+      .attr('height', '20')
+      .attr('fill', 'cornsilk')
+      .attr('stroke', 'black')
+      .attr('stroke-width', 1)
+    
+    tooltips.append('text')
+      .attr('x', 5)
+      .attr('y', 15)
+      .attr('font-size', 16)
+      .text(d => d.key)
+  } else {
+    const tooltips = diagram.selectAll('.tooltip').remove()
+  }
   
   circles.on("click", (e, d) => {
     if (selected) {
@@ -165,6 +206,7 @@ function view(state) {
   })
   
   const showTooltip = ({clientX, clientY}, {key}) => {
+    if (model.allTooltips) return
     const x = (clientX - 10) / dom.scaleX
     const y = (clientY - 80) / dom.scaleY
     dom.toolTipText
@@ -187,6 +229,7 @@ function createModel(rawData) {
   return {
     rawData,
     selected: null,
+    allTooltips: false,
     whoRegions: Array.from(new Set(rawData.map(d => d.WHO_Region))).sort()
   }
 }
@@ -194,14 +237,25 @@ function createModel(rawData) {
 function createDOM({whoRegions}) {
   d3.select("#container").select("*").remove()
 
+  const container = d3.select('#container')
+
   const x = 10
   const y = 10
   const scaleX = .75
   const scaleY = .75
 
-  const svg = d3.select("#container")
+  const tooltipsCheckBox = container.append('input')
+    .attr('type', 'checkbox')
+    .attr('id', 'tooltipsCheckBox')
+
+  const checkBoxLabel = container.append('label')
+    .attr('for', 'tootipsCheckBox')
+    .text('Always show tooltips')
+
+  const svg = container
     .append("svg")
     .attr("viewBox", "0 0 800 600")
+
 
   const drawArea = svg.append('g')
     .attr("transform", 
@@ -232,7 +286,7 @@ function createDOM({whoRegions}) {
     .attr('x', 5)
     .attr('y', 15)
   
-  return {x, y, scaleX, scaleY, svg, diagram, legend, toolTip, toolTipText }
+  return {x, y, scaleX, scaleY, svg, diagram, legend, toolTip, toolTipText, tooltipsCheckBox, checkBoxLabel }
 }
 
 function createViz({rawData}) {
@@ -282,6 +336,10 @@ async function init() {
       view(state)
     }
   }
+
+  dom.tooltipsCheckBox.on('click', () => {
+    state.update({allTooltips: dom.tooltipsCheckBox.property('checked')})
+  })
   
   view(state)
 }
