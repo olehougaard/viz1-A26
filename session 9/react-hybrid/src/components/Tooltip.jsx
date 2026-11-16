@@ -23,7 +23,7 @@ export function Tooltip(props) {
     {props.children}
     <g id='tool-tip' opacity={opacity} transform={`translate(${x}, ${y})`}>
       <rect width='160' height='20' fill='cornsilk' stroke='black' stroke-width='1'></rect>
-      <text x='5' y='15'>{tooltipText}</text>
+      <text x='5' y='15' fontSize='16'>{tooltipText}</text>
     </g>
   </TooltipContext>
 }
