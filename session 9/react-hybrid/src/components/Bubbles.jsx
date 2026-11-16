@@ -1,6 +1,6 @@
 import { useContext, useEffect } from "react";
 import { useViz, useVizModel } from "./Viz";
-import * as d3 from 'd3'
+import { select } from 'd3'
 import { TooltipContext } from "./Tooltip";
 
 export function Bubbles() {
@@ -10,7 +10,7 @@ export function Bubbles() {
   const { showTooltip, hideTooltip } = useContext(TooltipContext)
 
   useEffect(() => {
-    const diagram = d3.select('#bubbles')
+    const diagram = select('#bubbles')
     const circles = diagram.selectAll("circle")
       .data(filteredData, d => d.key)
       .join(

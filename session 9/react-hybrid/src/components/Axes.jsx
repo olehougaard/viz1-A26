@@ -1,6 +1,6 @@
 import { useEffect } from "react"
 import { useViz } from "./Viz"
-import * as d3 from 'd3'
+import { select, axisBottom, axisLeft } from 'd3'
 
 export function Axes() {
   console.log(useViz())
@@ -8,16 +8,16 @@ export function Axes() {
 
   useEffect(() => {
     if (systolicScale) {
-      d3.select('#horizontal-axis')
-        .call(d3.axisBottom(systolicScale))
+      select('#horizontal-axis')
+        .call(axisBottom(systolicScale))
         .attr("stroke-width", 2)
         .selectAll("text")
           .attr("y", 10)
     }
 
     if (diastolicScale) {
-      d3.select('#vertical-axis')
-      .call(d3.axisLeft(diastolicScale))
+      select('#vertical-axis')
+      .call(axisLeft(diastolicScale))
       .attr("stroke-width", 2)
       .selectAll("text")
         .attr("x", -10)    

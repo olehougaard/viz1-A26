@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import * as d3 from 'd3'
+import { scaleLinear, scaleOrdinal, schemeAccent } from 'd3'
 
 const emptyState = {
     model: {
@@ -8,10 +8,10 @@ const emptyState = {
         selected: new Set()
     },
     viz: {
-        systolicScale: d3.scaleLinear().domain([50, 200]).range([100, 700]),
-        diastolicScale: d3.scaleLinear().domain([50, 200]).range([500, 100]),
-        whoRegionScale: d3.scaleOrdinal().domain([]).range(d3.schemeAccent),
-        sizeScale: d3.scaleLinear().domain([0, 1000]).range([0, 25])
+        systolicScale: scaleLinear().domain([50, 200]).range([100, 700]),
+        diastolicScale: scaleLinear().domain([50, 200]).range([500, 100]),
+        whoRegionScale: scaleOrdinal().domain([]).range(schemeAccent),
+        sizeScale: scaleLinear().domain([0, 1000]).range([0, 25])
     }
 }
 
